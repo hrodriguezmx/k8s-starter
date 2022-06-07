@@ -5,9 +5,6 @@
   vars_files:
   - env_variables
 
-  collections:
-    - community.kubernetes
-
   tasks:
   - name: Download Weave Network Add-on manifest to the cluster.
     ansible.builtin.get_url:
@@ -15,14 +12,14 @@
       dest: "{{ artifacts_dir }}/net.yaml"
       mode: '0664'
   - name: Apply Weave Network Add-on manifest to the cluster.
-    community.kubernetes.k8s:
+    kubernetes.core.k8s:
       kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
       context: "{{ kubeconfig_context_name }}"
       state: present
       src: "{{ artifacts_dir }}/net.yaml"
 
   - name: Create develop namespace
-    community.kubernetes.k8s:
+    kubernetes.core.k8s:
       kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
       context: "{{ kubeconfig_context_name }}"
       name: develop
@@ -31,7 +28,7 @@
       state: present
 
   - name: Create openebs namespace
-    community.kubernetes.k8s:
+    kubernetes.core.k8s:
       kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
       context: "{{ kubeconfig_context_name }}"
       name: openebs
@@ -46,7 +43,7 @@
       mode: '0664'
 
   - name: Apply OpenEBS Add-on manifest to the cluster.
-    community.kubernetes.k8s:
+    kubernetes.core.k8s:
       kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
       context: "{{ kubeconfig_context_name }}"
       state: present
@@ -56,7 +53,7 @@
     pause:
 
   - name: Set default StorageClass as openebs-hostpath
-    community.kubernetes.k8s:
+    kubernetes.core.k8s:
       kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
       context: "{{ kubeconfig_context_name }}"
       definition:
@@ -68,7 +65,7 @@
             storageclass.kubernetes.io/is-default-class: "true"
 
   # - name: Disable THP
-  #   community.kubernetes.k8s:
+  #   kubernetes.core.k8s:
   #     kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
   #     context: "{{ kubeconfig_context_name }}"
   #     state: present
