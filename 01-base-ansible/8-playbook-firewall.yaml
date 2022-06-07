@@ -49,14 +49,12 @@
       - 10250
       - 10255
       - 10256
-      - 2379
       - 4149
       - 443
       - 4789
       - 5473
       - 6443
       - 80
-      - 6379
       - 5672
       - 53
 
@@ -68,7 +66,6 @@
     loop:
       - 53
 
-
   - name: Allow all access from RFC1918 networks to this host
     community.general.ufw:
       rule: allow
@@ -78,7 +75,7 @@
       - 10.0.0.0/8
       - 172.16.0.0/12
       - 192.168.0.0/16
-      - 144.126.139.141/32
+      - CHANGEME/32
 
   - name: Allow all outgoing
     community.general.ufw:
