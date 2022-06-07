@@ -6,8 +6,8 @@ This repos will allow you try some basic interactions with the process of create
 
 # Requirements
 
-1. Clone this repo locally.
-2. Install Ansible in your localßhost.
+1. Clone this repo locally
+2. Install Ansible in your localhost
 3. Install k9s
 4. Install Helm
 
@@ -84,5 +84,24 @@ mv k9s /usr/local/bin
 
 ```
 
+# Installing Helm
+
+This guide shows how to install the Helm CLI. Helm can be installed either from source, or from pre-built binary releases.
+
+```bash
+# macOS
+brew install helm
+
+# Debian/Ubuntu
+curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+sudo apt-get install apt-transport-https --yes
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get update
+sudo apt-get install helm
+
+# details
+https://helm.sh/docs/intro/install/
+
+```
 
 You can continue with the [Kubernetes installation with k0s using Ansible](k8s.md).
