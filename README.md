@@ -7,7 +7,7 @@ This repos will allow you try some basic interactions with the process of create
 # Requirements
 
 1. Clone this repo locally.
-2. Install Ansible in you localhost.
+2. Install Ansible in your localßhost.
 3. Install k9s
 4. Install Helm
 
@@ -72,5 +72,17 @@ Via Homebrew for macOS or LinuxBrew for Linux
 ```bash
 brew install k9s
 ```
+
+or use wget
+
+```bash
+wget -c https://github.com/derailed/k9s/releases/download/v0.25.18/k9s_Linux_x86_64.tar.gz
+
+tar xfvz k9s_Linux_x86_64.tar.gz
+
+mv k9s /usr/local/bin
+
+```
+
 
 You can continue with the [Kubernetes installation with k0s using Ansible](k8s.md).
