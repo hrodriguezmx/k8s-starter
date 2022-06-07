@@ -6,7 +6,7 @@ This repos will allow you try some basic interactions with the process of create
 
 # Requirements
 
-1. Clone this repo locally.
+1. Clone this repo locally
 2. Install Ansible in your localhost
 3. Install k9s
 4. Install Helm
