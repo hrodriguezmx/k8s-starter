@@ -14,10 +14,10 @@ k0s is distributed as a single binary with zero host OS dependencies besides the
 
 Production ready clusters can be also deployed with k0sctl.
 
-The k0s version to be used is 1.22.10, referenced as v1.22.10+k0s.0. You can see or change this into `01-base-ansible/roles/download/defaults/main.yml` file.
+The k0s version to be used is 1.23.6, referenced as v1.23.6+k0s.2. You can see or change this into `01-base-ansible/roles/download/defaults/main.yml` file.
 
 ``` yaml
-k0s_version: v1.22.10+k0s.0
+k0s_version: v1.23.6+k0s.2
 ```
 
 # Previous requirements
@@ -89,7 +89,7 @@ $ code hosts
 mynode ansible_host=CHANGEME
 
 # example: use your server ip address
-mynode ansible_host=144.23.55.12
+mynode ansible_host=144.23.65.12
 
 ```
 
@@ -126,12 +126,33 @@ ansible-playbook 5-playbook-docker.yml
 ansible-playbook 6-playbook-k0s.yml;
 
 # update standalone node as worker also
-kubectl taint nodes charts node-role.kubernetes.io/master-
+export KUBECONFIG=./artifacts/k0s-kubeconfig.yml
+kubectl get nodes
+# take note of the NAME column and replace in this line
+kubectl taint nodes MYNODENAME node-role.kubernetes.io/master-
 
 # add network pods and openebs
+# check for https://docs.ansible.com/ansible/latest/collections/kubernetes/core/k8s_module.html
+# install required pip module
+# apt install python3-pip
+# pip install kubernetes
+# pip install PyYAML
+# pip install jsonpatch
+#
+# install required collection
+# ansible-galaxy collection install kubernetes.core
 ansible-playbook 7-playbook-k8s.yaml;
 
 # configure basic firewall rules
+# set host ip address into 8/playbook-firewall.yaml
+#
+# ...
+# - name: Allow all access from RFC1918 networks to this host
+# ...
+#   - CHANGEME/32
+# and set your server main ip address
+# example:
+#   - 1.2.3.4/32
 ansible-playbook 8-playbook-firewall.yaml;
 
 # protect your host with fail2ban
