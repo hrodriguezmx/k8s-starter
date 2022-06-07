@@ -1,0 +1,64 @@
+---
+
+- name: Create k0s initial controller service with install command
+  register: install_initial_controller_cmd
+  command: k0s install controller --enable-worker --config {{ k0s_config_dir }}/k0s.yaml {{ extra_args | default(omit) }}
+  changed_when: install_initial_controller_cmd | length > 0
+
+- name: Enable and check k0s service
+  systemd:
+    name: k0scontroller
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+
+- name: Wait for k8s apiserver
+  wait_for:
+    host: localhost
+    port: 6443
+    delay: 15
+    timeout: 180
+
+- name: Copy config file to user home directory
+  copy:
+    src: "{{ k0s_data_dir }}/pki/admin.conf"
+    dest: ./k0s-kubeconfig.yml
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    mode: 0644
+
+- name: Set controller IP in kubeconfig
+  replace:
+    path: ./k0s-kubeconfig.yml
+    regexp: 'localhost'
+    replace: "{{ ansible_host }}"
+
+- name: Set cluster name in kubeconfig
+  replace:
+    path: ./k0s-kubeconfig.yml
+    regexp: "local"
+    replace: "{{ kubeconfig_cluster_name }}"
+
+- name: Set context name in kubeconfig
+  replace:
+    path: ./k0s-kubeconfig.yml
+    regexp: "name: Default"
+    replace: "name: {{ kubeconfig_context_name }}"
+
+- name: Set context name in kubeconfig
+  replace:
+    path: ./k0s-kubeconfig.yml
+    regexp: "current-context: Default"
+    replace: "current-context: {{ kubeconfig_context_name }}"
+
+- name: Copy kubeconfig
+  fetch:
+    src: "./k0s-kubeconfig.yml"
+    dest: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+    flat: yes
+    validate_checksum: no
+  become: no
+
+- name: "print kubeconfig command"
+  debug:
+    msg: "To use Cluster: export KUBECONFIG={{ artifacts_dir }}/k0s-kubeconfig.yml"

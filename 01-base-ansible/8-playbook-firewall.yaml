@@ -1,0 +1,113 @@
+---
+# ansible-galaxy collection install community.general.ufw
+- hosts: [all]
+  user: root
+  vars_files:
+  - env_variables
+  tasks:
+  - name: Let iptables see bridged traffic
+    sysctl:
+      name: "{{ item }}"
+      value: "1"
+      state: present
+    loop:
+      - net.bridge.bridge-nf-call-iptables
+      - net.bridge.bridge-nf-call-ip6tables
+      - net.ipv4.ip_forward
+
+  # ufw supports connection rate limiting, which is useful for protecting
+  # against brute-force login attacks. ufw will deny connections if an IP
+  # address has attempted to initiate 6 or more connections in the last
+  # 30 seconds. See  http://www.debian-administration.org/articles/187
+  # for details. Typical usage is:
+  - name: Limit SSH
+    community.general.ufw:
+      rule: limit
+      port: ssh
+      proto: tcp
+
+  # Allow OpenSSH. (Note that as ufw manages its own state, simply removing
+  # a rule=allow task can leave those ports exposed. Either use delete=yes
+  # or a separate state=reset task)
+  - name: Allow SSH
+    community.general.ufw:
+      rule: allow
+      name: OpenSSH
+
+  - name: Deny everything and enable UFW
+    community.general.ufw:
+      state: enabled
+      policy: deny
+      log: yes
+
+  - name: Open tcp ports
+    community.general.ufw:
+      rule: allow
+      port: '{{ item }}'
+      proto: tcp
+    loop:
+      - 10250
+      - 10255
+      - 10256
+      - 2379
+      - 4149
+      - 443
+      - 4789
+      - 5473
+      - 6443
+      - 80
+      - 6379
+      - 5672
+      - 53
+
+  - name: Open udp ports
+    community.general.ufw:
+      rule: allow
+      port: '{{ item }}'
+      proto: udp
+    loop:
+      - 53
+
+
+  - name: Allow all access from RFC1918 networks to this host
+    community.general.ufw:
+      rule: allow
+      src: '{{ item }}'
+    loop:
+      - 127.0.0.0/8
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 144.126.139.141/32
+
+  - name: Allow all outgoing
+    community.general.ufw:
+      state: enabled
+      direction: outgoing
+      policy: allow
+  - name: Allow all routed
+    community.general.ufw:
+      state: enabled
+      direction: routed
+      policy: allow
+
+  # - name: Allow all custom outgoing
+  #   community.general.ufw:
+  #     state: enabled
+  #     policy: allow
+  #     src: '{{ item }}'
+  #   loop:
+  #     - 127.0.0.0/8
+  #     - 10.0.0.0/8
+  #     - 172.16.0.0/12
+  #     - 192.168.0.0/16
+  #     - 144.126.139.145/32
+
+  # Sometimes it is desirable to let the sender know when traffic is
+  # being denied, rather than simply ignoring it. In these cases, use
+  # reject instead of deny. In addition, log rejected connections:
+  - name: Reject and Log
+    community.general.ufw:
+      rule: reject
+      port: auth
+      log: yes

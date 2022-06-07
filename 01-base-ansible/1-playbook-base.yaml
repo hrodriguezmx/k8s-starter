@@ -1,0 +1,40 @@
+- hosts: [all]
+  user: root
+  vars_files:
+  - env_variables
+
+  tasks:
+  - name: "Remove swapfile from /etc/fstab"
+    register: remove_swap_cmd
+    mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    with_items:
+      - swap
+
+  - name: "Disabling Swap on node"
+    shell: swapoff -a
+    changed_when: remove_swap_cmd | length > 0
+
+  - name: Install wanted packages
+    package:
+      name: "{{ wanted_pkg }}"
+      state: present
+
+  - name: Additional Redis systemctl config
+    shell: |
+      echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled
+
+  - name: Enable and check snapd service
+    become: true
+    systemd:
+      name: snapd
+      daemon_reload: yes
+      state: restarted
+      enabled: yes
+
+  - name: Install kubectl with snap with option --classic
+    community.general.snap:
+      name: kubectl
+      classic: yes
