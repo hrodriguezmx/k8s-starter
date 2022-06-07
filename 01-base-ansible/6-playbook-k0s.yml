@@ -1,0 +1,44 @@
+---
+
+- hosts: all
+  name: Download k0s on all nodes
+  user: root
+  vars_files:
+  - env_variables
+  roles:
+    - role: download
+      tags: download
+    - role: prereq
+      tags: prereq
+
+# - hosts: initial_controller
+#   gather_facts: yes
+#   become: yes
+#   name: Configure initial k0s control plane node
+#   roles:
+#     - role: k0s/initial_controller
+#       tags: init
+#
+# - hosts: controller
+#   gather_facts: yes
+#   become: yes
+#   serial: 1
+#   name: Configure k0s control plane nodes
+#   roles:
+#     - role: k0s/controller
+#       tags: server
+#
+# - hosts: worker
+#   become: yes
+#   name: Configure k0s worker nodes
+#   roles:
+#     - role: k0s/worker
+#       tags: worker
+
+- hosts: single_control_plane
+  user: root
+  vars_files:
+  - env_variables
+  name: Configure k0s single control plane
+  roles:
+    - role: k0s/single_control_plane

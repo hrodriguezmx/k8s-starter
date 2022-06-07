@@ -1,0 +1,75 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  vars_files:
+  - env_variables
+
+  collections:
+    - community.kubernetes
+
+  tasks:
+  - name: Download Weave Network Add-on manifest to the cluster.
+    ansible.builtin.get_url:
+      url: https://cloud.weave.works/k8s/net
+      dest: "{{ artifacts_dir }}/net.yaml"
+      mode: '0664'
+  - name: Apply Weave Network Add-on manifest to the cluster.
+    community.kubernetes.k8s:
+      kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+      context: "{{ kubeconfig_context_name }}"
+      state: present
+      src: "{{ artifacts_dir }}/net.yaml"
+
+  - name: Create develop namespace
+    community.kubernetes.k8s:
+      kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+      context: "{{ kubeconfig_context_name }}"
+      name: develop
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Create openebs namespace
+    community.kubernetes.k8s:
+      kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+      context: "{{ kubeconfig_context_name }}"
+      name: openebs
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Download OpenEBS Add-on manifest to the cluster.
+    ansible.builtin.get_url:
+      url: https://openebs.github.io/charts/openebs-operator.yaml
+      dest: "{{ artifacts_dir }}/openebs-operator.yaml"
+      mode: '0664'
+
+  - name: Apply OpenEBS Add-on manifest to the cluster.
+    community.kubernetes.k8s:
+      kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+      context: "{{ kubeconfig_context_name }}"
+      state: present
+      src: "{{ artifacts_dir }}/openebs-operator.yaml"
+
+  - name: Pause until you can verify OpenEBS is up and running (watch kubectl -n openebs get pods)
+    pause:
+
+  - name: Set default StorageClass as openebs-hostpath
+    community.kubernetes.k8s:
+      kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+      context: "{{ kubeconfig_context_name }}"
+      definition:
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: openebs-hostpath
+          annotations:
+            storageclass.kubernetes.io/is-default-class: "true"
+
+  # - name: Disable THP
+  #   community.kubernetes.k8s:
+  #     kubeconfig: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+  #     context: "{{ kubeconfig_context_name }}"
+  #     state: present
+  #     src: "./manifests/thp-disable.yaml"

@@ -1,0 +1,5 @@
+[cloud_server]
+mynode ansible_host=CHANGEME
+
+[single_control_plane]
+mynode ansible_host=CHANGEME

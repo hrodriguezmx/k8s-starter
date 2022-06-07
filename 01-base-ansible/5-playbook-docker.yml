@@ -1,0 +1,28 @@
+---
+- hosts: [all]
+  user: root
+  vars_files:
+  - env_variables
+  tasks:
+  - name: "Getting docker package key"
+    shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+  - name: "Adding docker repo"
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+      state: present
+
+  - name: "Update package list"
+    apt:
+      upgrade: yes
+      update_cache: yes
+
+  - name: "Installing docker"
+    package: name={{item}} state=present
+    with_items:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+  - name: "Enable docker service"
+    shell: systemctl enable docker
