@@ -14,10 +14,10 @@ k0s is distributed as a single binary with zero host OS dependencies besides the
 
 Production ready clusters can be also deployed with k0sctl.
 
-The k0s version to be used is 1.22.10, referenced as v1.22.10+k0s.0. You can see or change this into `01-base-ansible/roles/download/defaults/main.yml` file.
+The k0s version to be used is 1.23.5, referenced as v1.23.5+k0s.0. You can see or change this into `01-base-ansible/roles/download/defaults/main.yml` file.
 
 ``` yaml
-k0s_version: v1.22.10+k0s.0
+k0s_version: v1.23.5+k0s.0
 ```
 
 # Previous requirements
@@ -126,7 +126,7 @@ ansible-playbook 5-playbook-docker.yml
 ansible-playbook 6-playbook-k0s.yml;
 
 # update standalone node as worker also
-kubectl taint nodes charts node-role.kubernetes.io/master-
+kubectl taint nodes mynode node-role.kubernetes.io/master-
 
 # add network pods and openebs
 ansible-playbook 7-playbook-k8s.yaml;
