@@ -22,43 +22,43 @@
 - name: Copy config file to user home directory
   copy:
     src: "{{ k0s_data_dir }}/pki/admin.conf"
-    dest: ./k0s-kubeconfig.yml
+    dest: "./k0s-kubeconfig-{{ ansible_host }}.yml"
     remote_src: yes
     owner: "{{ ansible_user }}"
     mode: 0644
 
 - name: Set controller IP in kubeconfig
   replace:
-    path: ./k0s-kubeconfig.yml
+    path: "./k0s-kubeconfig-{{ ansible_host }}.yml"
     regexp: 'localhost'
     replace: "{{ ansible_host }}"
 
 - name: Set cluster name in kubeconfig
   replace:
-    path: ./k0s-kubeconfig.yml
+    path: "./k0s-kubeconfig-{{ ansible_host }}.yml"
     regexp: "local"
     replace: "{{ kubeconfig_cluster_name }}"
 
 - name: Set context name in kubeconfig
   replace:
-    path: ./k0s-kubeconfig.yml
+    path: "./k0s-kubeconfig-{{ ansible_host }}.yml"
     regexp: "name: Default"
     replace: "name: {{ kubeconfig_context_name }}"
 
 - name: Set context name in kubeconfig
   replace:
-    path: ./k0s-kubeconfig.yml
+    path: "./k0s-kubeconfig-{{ ansible_host }}.yml"
     regexp: "current-context: Default"
     replace: "current-context: {{ kubeconfig_context_name }}"
 
 - name: Copy kubeconfig
   fetch:
-    src: "./k0s-kubeconfig.yml"
-    dest: "{{ artifacts_dir }}/k0s-kubeconfig.yml"
+    src: "./k0s-kubeconfig-{{ ansible_host }}.yml"
+    dest: "{{ artifacts_dir }}/k0s-kubeconfig-{{ ansible_host }}.yml"
     flat: yes
     validate_checksum: no
   become: no
 
 - name: "print kubeconfig command"
   debug:
-    msg: "To use Cluster: export KUBECONFIG={{ artifacts_dir }}/k0s-kubeconfig.yml"
+    msg: "To use Cluster: export KUBECONFIG={{ artifacts_dir }}/k0s-kubeconfig-{{ ansible_host }}.yml"
